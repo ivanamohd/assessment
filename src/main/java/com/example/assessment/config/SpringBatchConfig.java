@@ -28,7 +28,6 @@ public class SpringBatchConfig {
 
     private TransactionRepository transactionRepository;
 
-
     @Bean
     public FlatFileItemReader<Transaction> reader() {
         FlatFileItemReader<Transaction> itemReader = new FlatFileItemReader<>();
@@ -92,5 +91,4 @@ public class SpringBatchConfig {
         asyncTaskExecutor.setConcurrencyLimit(10);
         return asyncTaskExecutor;
     }
-
 }
