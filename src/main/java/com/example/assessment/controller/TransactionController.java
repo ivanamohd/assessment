@@ -1,9 +1,12 @@
 package com.example.assessment.controller;
 
+import com.example.assessment.ResourceNotFoundException;
 import com.example.assessment.entity.Transaction;
 import com.example.assessment.repository.TransactionRepository;
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Page;
@@ -53,16 +56,24 @@ public class TransactionController {
 
     // Update transaction's description
     @PutMapping("/transactions/{id}")
-    Transaction updateTransaction(@RequestBody Transaction newTransaction, @PathVariable Long id) {
+    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction newTransaction, @PathVariable Long id) {
+        try {
+            Transaction existingTransaction = transactionRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + id));
 
-        return transactionRepository.findById(id)
-                .map(existingTransaction -> {
-                    existingTransaction.setDESCRIPTION(newTransaction.getDESCRIPTION());
-                    return transactionRepository.save(existingTransaction);
-                })
-                .orElseGet(() -> {
-                    newTransaction.setID(id);
-                    return transactionRepository.save(newTransaction);
-                });
+            if (existingTransaction.getVersion() == (newTransaction.getVersion())) {
+                existingTransaction.setDESCRIPTION(newTransaction.getDESCRIPTION());
+                existingTransaction.setVersion(existingTransaction.getVersion() + 1);
+
+                // Save updated transaction
+                Transaction updatedTransaction = transactionRepository.save(existingTransaction);
+                return ResponseEntity.ok(updatedTransaction);
+            } else {
+                // Handle concurrent update conflict
+                throw new OptimisticLockException("Transaction has been modified by another user. Please try again.");
+            }
+        } catch (OptimisticLockException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
     }
 }

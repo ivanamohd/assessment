@@ -28,4 +28,15 @@ public class Transaction {
     private String TRX_TIME;
     @Column(name = "CUSTOMER_ID")
     private String CUSTOMER_ID;
+
+    @Version
+    private int version;
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
 }
