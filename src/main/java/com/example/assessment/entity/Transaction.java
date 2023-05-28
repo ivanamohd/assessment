@@ -19,7 +19,7 @@ public class Transaction {
     @Column(name = "ACCOUNT_NUMBER")
     private String ACCOUNT_NUMBER;
     @Column(name = "TRX_AMOUNT")
-    private String TRX_AMOUNT;
+    private Double TRX_AMOUNT;
     @Column(name = "DESCRIPTION")
     private String DESCRIPTION;
     @Column(name = "TRX_DATE")
@@ -28,6 +28,4 @@ public class Transaction {
     private String TRX_TIME;
     @Column(name = "CUSTOMER_ID")
     private String CUSTOMER_ID;
-
-
 }
